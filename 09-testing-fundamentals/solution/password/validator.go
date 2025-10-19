@@ -25,10 +25,10 @@ type BreachedService interface {
 
 // PasswordValidator handles password validation
 type PasswordValidator struct {
-	minLength    int
-	maxLength    int
-	breachedSvc  BreachedService
-	commonWords  map[string]bool
+	minLength   int
+	maxLength   int
+	breachedSvc BreachedService
+	commonWords map[string]bool
 }
 
 // NewPasswordValidator creates a new password validator
@@ -120,20 +120,30 @@ func (pv *PasswordValidator) checkComplexity(password string, result *Validation
 		switch {
 		case unicode.IsUpper(char):
 			hasUpper = true
-			score += 10
 		case unicode.IsLower(char):
 			hasLower = true
-			score += 10
 		case unicode.IsNumber(char):
 			hasNumber = true
-			score += 10
 		case unicode.IsPunct(char) || unicode.IsSymbol(char):
 			hasSpecial = true
-			score += 15
 		}
 	}
 
-	// Add complexity bonus
+	// Score based on character types present
+	if hasUpper {
+		score += 10
+	}
+	if hasLower {
+		score += 10
+	}
+	if hasNumber {
+		score += 10
+	}
+	if hasSpecial {
+		score += 15
+	}
+
+	// Add complexity bonus for all character types
 	if hasUpper && hasLower && hasNumber && hasSpecial {
 		score += 20
 	}
@@ -213,15 +223,36 @@ func (pv *PasswordValidator) isKeyboardPattern(password string) bool {
 		if strings.Contains(password, pattern) {
 			return true
 		}
+		// Also check reverse patterns
+		reversePattern := reverseString(pattern)
+		if strings.Contains(password, reversePattern) {
+			return true
+		}
 	}
 	return false
+}
+
+// reverseString reverses a string
+func reverseString(s string) string {
+	runes := []rune(s)
+	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+		runes[i], runes[j] = runes[j], runes[i]
+	}
+	return string(runes)
 }
 
 // containsCommonWords checks if password contains common words
 func (pv *PasswordValidator) containsCommonWords(password string) bool {
 	lowerPassword := strings.ToLower(password)
 
-	// Split password into possible words
+	// Check if any common word is directly contained
+	for commonWord := range pv.commonWords {
+		if strings.Contains(lowerPassword, commonWord) {
+			return true
+		}
+	}
+
+	// Also split password into possible words
 	words := pv.extractWords(lowerPassword)
 
 	for _, word := range words {
@@ -260,24 +291,26 @@ func (pv *PasswordValidator) extractWords(password string) []string {
 func (pv *PasswordValidator) calculateScore(password string, complexityScore int) int {
 	score := 0
 
-	// Length contribution
+	// Length contribution (capped)
 	length := len(password)
 	if length >= 8 {
-		score += 20
+		score += 15
 	}
 	if length >= 12 {
-		score += 20
+		score += 10
 	}
 	if length >= 16 {
-		score += 10
+		score += 5
 	}
 
 	// Complexity contribution
 	score += complexityScore
 
-	// Entropy contribution
+	// Small entropy bonus
 	entropy := pv.calculateEntropy(password)
-	score += int(entropy)
+	if entropy > 40 {
+		score += 5
+	}
 
 	// Cap the score at 100
 	if score > 100 {
@@ -355,34 +388,68 @@ func GeneratePassword(length int, includeUpper, includeLower, includeNumbers, in
 		return "", fmt.Errorf("password length must be at least 4 characters")
 	}
 
-	var charset string
+	var allChars string
+	var requiredChars []byte
 	if includeLower {
-		charset += "abcdefghijklmnopqrstuvwxyz"
+		allChars += "abcdefghijklmnopqrstuvwxyz"
+		requiredChars = append(requiredChars, getRandomChar("abcdefghijklmnopqrstuvwxyz"))
 	}
 	if includeUpper {
-		charset += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		allChars += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		requiredChars = append(requiredChars, getRandomChar("ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
 	}
 	if includeNumbers {
-		charset += "0123456789"
+		allChars += "0123456789"
+		requiredChars = append(requiredChars, getRandomChar("0123456789"))
 	}
 	if includeSymbols {
-		charset += "!@#$%^&*()_+-=[]{}|;:,.<>?"
+		allChars += "!@#$%^&*()_+-=[]{}|;:,.<>?"
+		requiredChars = append(requiredChars, getRandomChar("!@#$%^&*()_+-=[]{}|;:,.<>?"))
 	}
 
-	if charset == "" {
+	if allChars == "" {
 		return "", fmt.Errorf("at least one character type must be selected")
 	}
 
+	// Ensure we have room for required characters
+	if len(requiredChars) > length {
+		return "", fmt.Errorf("password length too small for required character types")
+	}
+
+	// Build password
 	password := make([]byte, length)
-	for i := range password {
-		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+
+	// First, add required characters
+	copy(password, requiredChars)
+
+	// Fill remaining positions with random characters from all available
+	for i := len(requiredChars); i < length; i++ {
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(allChars))))
 		if err != nil {
 			return "", err
 		}
-		password[i] = charset[num.Int64()]
+		password[i] = allChars[num.Int64()]
+	}
+
+	// Shuffle the password to randomize character positions
+	for i := len(password) - 1; i > 0; i-- {
+		j, err := rand.Int(rand.Reader, big.NewInt(int64(i+1)))
+		if err != nil {
+			return "", err
+		}
+		password[i], password[j.Int64()] = password[j.Int64()], password[i]
 	}
 
 	return string(password), nil
+}
+
+// getRandomChar returns a random character from the given charset
+func getRandomChar(charset string) byte {
+	if charset == "" {
+		return 0
+	}
+	num, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+	return charset[num.Int64()]
 }
 
 // EstimateStrength provides a quick strength estimate
