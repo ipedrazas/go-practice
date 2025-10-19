@@ -28,17 +28,17 @@ type LogEntry struct {
 }
 
 type Stats struct {
-	TotalRequests    int
-	TotalBytes       int64
-	StatusCodes      map[int]int
-	TopIPs           map[string]int
-	TopPages         map[string]int
-	TopUserAgents    map[string]int
-	RequestsPerHour  map[string]int
-	RequestsPerDay   map[string]int
-	ErrorEntries     []LogEntry
-	InvalidLines     int
-	ParseErrors      int
+	TotalRequests   int
+	TotalBytes      int64
+	StatusCodes     map[int]int
+	TopIPs          map[string]int
+	TopPages        map[string]int
+	TopUserAgents   map[string]int
+	RequestsPerHour map[string]int
+	RequestsPerDay  map[string]int
+	ErrorEntries    []LogEntry
+	InvalidLines    int
+	ParseErrors     int
 }
 
 type OutputFormat string
@@ -51,14 +51,14 @@ const (
 
 func main() {
 	var (
-		file     = flag.String("f", "", "Log file to analyze (required)")
-		pattern  = flag.String("p", "", "Custom regex pattern for parsing")
-		start    = flag.String("s", "", "Start time (RFC3339 format)")
-		end      = flag.String("e", "", "End time (RFC3339 format)")
-		output   = flag.String("o", "text", "Output format (text, json, csv)")
-		top      = flag.Int("t", 10, "Number of top results to show")
-		verbose  = flag.Bool("v", false, "Verbose output")
-		help     = flag.Bool("h", false, "Show help")
+		file    = flag.String("f", "", "Log file to analyze (required)")
+		pattern = flag.String("p", "", "Custom regex pattern for parsing")
+		start   = flag.String("s", "", "Start time (RFC3339 format)")
+		end     = flag.String("e", "", "End time (RFC3339 format)")
+		output  = flag.String("o", "text", "Output format (text, json, csv)")
+		top     = flag.Int("t", 10, "Number of top results to show")
+		verbose = flag.Bool("v", false, "Verbose output")
+		help    = flag.Bool("h", false, "Show help")
 	)
 
 	flag.Usage = func() {
@@ -114,12 +114,12 @@ func main() {
 
 	// Analyze log file
 	analyzer := &LogAnalyzer{
-		FilePath:     *file,
+		FilePath:      *file,
 		CustomPattern: *pattern,
-		StartTime:    startTime,
-		EndTime:      endTime,
-		TopCount:     *top,
-		Verbose:      *verbose,
+		StartTime:     startTime,
+		EndTime:       endTime,
+		TopCount:      *top,
+		Verbose:       *verbose,
 	}
 
 	stats, err := analyzer.Analyze()
@@ -202,7 +202,7 @@ func (la *LogAnalyzer) Analyze() (*Stats, error) {
 
 		// Collect error entries
 		if entry.Status >= 400 {
-			stats.ErrorEntries = append(stats.ErrorEntries, entry)
+			stats.ErrorEntries = append(stats.ErrorEntries, *entry)
 		}
 	}
 
@@ -339,7 +339,7 @@ func outputTextResults(stats *Stats, topCount int) error {
 
 	// Status code distribution
 	fmt.Printf("Status Code Distribution:\n")
-	printTopMap(stats.StatusCodes, topCount, "Status", "Count")
+	printTopMapInt(stats.StatusCodes, topCount, "Status", "Count")
 	fmt.Printf("\n")
 
 	// Top IPs
@@ -443,6 +443,31 @@ func printTopMapString(m map[string]int, top int, keyLabel, valueLabel string) {
 			key = key[:77] + "..."
 		}
 		fmt.Printf("  %s: %d %s\n", key, item.Value, valueLabel)
+	}
+}
+
+func printTopMapInt(m map[int]int, top int, keyLabel, valueLabel string) {
+	var items []struct {
+		Key   int
+		Value int
+	}
+	for k, v := range m {
+		items = append(items, struct {
+			Key   int
+			Value int
+		}{k, v})
+	}
+
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].Value > items[j].Value
+	})
+
+	if len(items) > top {
+		items = items[:top]
+	}
+
+	for _, item := range items {
+		fmt.Printf("  %d: %d %s\n", item.Key, item.Value, valueLabel)
 	}
 }
 

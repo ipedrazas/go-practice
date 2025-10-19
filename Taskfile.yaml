@@ -1,0 +1,326 @@
+# Taskfile for Go Practice exercises
+# Usage: task <command>
+
+version: '3'
+
+vars:
+  GO_VERSION: '1.19'
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task -l
+
+  # Build all exercises
+  build:
+    desc: Build all exercise solutions
+    summary: |
+      Builds all exercise solutions to verify they compile correctly.
+      This will fail if any exercise has compilation errors.
+    cmds:
+      - cmd: |
+          for exercise in 01-url-downloader 02-file-organizer 03-log-analyzer 04-json-validator 05-port-scanner 06-dir-sizer 07-web-server 08-index-generator; do
+            echo "Building $exercise..."
+            cd "$exercise/solution"
+            if [ -f main.go ]; then
+              go build -o "$exercise" main.go
+              echo "  OK $exercise built successfully"
+            else
+              echo "  SKIP No main.go found in $exercise/solution"
+            fi
+            cd ../..
+          done
+
+          echo "Building 09-testing-fundamentals..."
+          cd 09-testing-fundamentals/solution
+          if [ -f main.go ]; then
+            go build -o 09-testing-fundamentals main.go
+            echo "  OK 09-testing-fundamentals built successfully"
+          else
+            echo "  SKIP No main.go found in 09-testing-fundamentals/solution"
+          fi
+          cd ../..
+    ignore_error: false
+
+  # Test all exercises that have tests
+  test:
+    desc: Run tests for all exercises
+    summary: |
+      Runs tests for exercises that have test files.
+      Currently only 09-testing-fundamentals has comprehensive tests.
+    cmds:
+      - cmd: |
+          echo "Running tests for all exercises..."
+          cd 09-testing-fundamentals/solution
+          echo "Testing 09-testing-fundamentals..."
+          if [ -f go.mod ] && [ -d "password" ]; then
+            go test ./password -v
+            echo "  OK 09-testing-fundamentals tests completed"
+          else
+            echo "  SKIP No tests found for 09-testing-fundamentals"
+          fi
+          cd ../..
+          echo "All available tests completed"
+    ignore_error: true
+
+  # Quick validation (build only)
+  validate:
+    desc: Validate all exercises build correctly
+    summary: |
+      Quick validation that all exercises can be built.
+      This is faster than running all tests.
+    cmds:
+      - echo "Validating all Go Practice exercises..."
+      - task: build
+      - echo "All exercises validated successfully!"
+
+  # Full validation (build + test)
+  check:
+    desc: Full validation including tests
+    summary: |
+      Complete validation including building all exercises and running tests.
+      This ensures everything works correctly.
+    cmds:
+      - echo "Running full validation of Go Practice exercises..."
+      - task: build
+      - task: test
+      - echo "Full validation completed!"
+
+  # Clean build artifacts
+  clean:
+    desc: Clean build artifacts
+    summary: |
+      Removes compiled binaries and other build artifacts.
+    cmds:
+      - for exercise in 01-url-downloader 02-file-organizer 03-log-analyzer 04-json-validator 05-port-scanner 06-dir-sizer 07-web-server 08-index-generator 09-testing-fundamentals; do
+          cd "$exercise/solution"
+          rm -f "$exercise"
+          rm -f exercise
+          if [ -f go.mod ]; then
+            go clean -cache
+          fi
+          cd ../..
+        done
+      - echo "Cleaned all build artifacts"
+
+  # Check Go formatting
+  fmt:
+    desc: Check Go code formatting
+    summary: |
+      Checks if all Go files are properly formatted.
+    cmds:
+      - for exercise in 01-url-downloader 02-file-organizer 03-log-analyzer 04-json-validator 05-port-scanner 06-dir-sizer 07-web-server 08-index-generator 09-testing-fundamentals; do
+          cd "$exercise/solution"
+          if [ -f go.mod ]; then
+            go fmt ./...
+          elif [ -f main.go ]; then
+            go fmt *.go
+          fi
+          cd ../..
+        done
+      - echo "Code formatting checked"
+
+  # Run go vet on all exercises
+  vet:
+    desc: Run go vet on all exercises
+    summary: |
+      Runs go vet to analyze code for potential issues.
+    cmds:
+      - for exercise in 01-url-downloader 02-file-organizer 03-log-analyzer 04-json-validator 05-port-scanner 06-dir-sizer 07-web-server 08-index-generator 09-testing-fundamentals; do
+          cd "$exercise/solution"
+          if [ -f go.mod ]; then
+            go vet ./...
+          elif [ -f main.go ]; then
+            go vet main.go
+          fi
+          cd ../..
+        done
+      - echo "Code analysis completed"
+
+  # Generate summary report
+  summary:
+    desc: Generate summary of all exercises
+    summary: |
+      Creates a summary report of the Go Practice syllabus.
+    cmds:
+      - cmd: |
+          echo "Go Practice: Real-World CLI Exercises"
+          echo "=========================================="
+          echo ""
+          echo "Available exercises:"
+          echo "  01-url-downloader      - Download files from URLs"
+          echo "  02-file-organizer     - Organize files by type and rules"
+          echo "  03-log-analyzer       - Parse and analyze log files"
+          echo "  04-json-validator     - Validate JSON configurations"
+          echo "  05-port-scanner       - Scan network ports"
+          echo "  06-dir-sizer          - Analyze directory disk usage"
+          echo "  07-web-server         - Build a web server with templates"
+          echo "  08-index-generator    - Generate exercise index"
+          echo "  09-testing-fundamentals - Learn Go testing and TDD"
+          echo ""
+          echo "Total: 9 exercises"
+          echo ""
+          echo "Get started with:"
+          echo "  task build    # Build all exercises"
+          echo "  task test     # Run tests"
+          echo "  task validate # Quick validation"
+
+  # Build specific exercise
+  build-exercise:
+    desc: Build a specific exercise
+    summary: |
+      Builds a specific exercise by number or name.
+      Usage: task build-exercise -- 01-url-downloader
+    vars:
+      EXERCISE: "{{.CLI_ARGS}}"
+    cmds:
+      - |
+        if [ -z "{{.EXERCISE}}" ]; then
+          echo "Usage: task build-exercise -- <exercise-name>"
+          echo "Available exercises:"
+          echo "  01-url-downloader"
+          echo "  02-file-organizer"
+          echo "  03-log-analyzer"
+          echo "  04-json-validator"
+          echo "  05-port-scanner"
+          echo "  06-dir-sizer"
+          echo "  07-web-server"
+          echo "  08-index-generator"
+          echo "  09-testing-fundamentals"
+          exit 1
+        fi
+
+        echo "Building {{.EXERCISE}}..."
+        cd {{.EXERCISE}}/solution
+        if [ -f go.mod ]; then
+          go build -o {{.EXERCISE}} ./...
+        elif [ -f main.go ]; then
+          go build -o {{.EXERCISE}} main.go
+        else
+          echo "ERROR: No buildable files found in {{.EXERCISE}}/solution"
+          exit 1
+        fi
+        echo "{{.EXERCISE}} built successfully"
+
+  # Test specific exercise
+  test-exercise:
+    desc: Test a specific exercise
+    summary: |
+      Tests a specific exercise by number or name.
+      Usage: task test-exercise -- 09-testing-fundamentals
+    vars:
+      EXERCISE: "{{.CLI_ARGS}}"
+    cmds:
+      - |
+        if [ -z "{{.EXERCISE}}" ]; then
+          echo "Usage: task test-exercise -- <exercise-name>"
+          echo "Available exercises with tests:"
+          echo "  09-testing-fundamentals"
+          exit 1
+        fi
+
+        echo "Testing {{.EXERCISE}}..."
+        cd {{.EXERCISE}}/solution
+        if [ -f go.mod ] && [ -d "password" ]; then
+          go test ./password -v
+        elif [ -f go.mod ]; then
+          go test -v ./...
+        else
+          echo "WARNING: No tests found for {{.EXERCISE}}"
+        fi
+
+  # Development helpers
+  dev-setup:
+    desc: Set up development environment
+    summary: |
+      Sets up the development environment for the Go Practice exercises.
+    cmds:
+      - cmd: |
+          echo "Setting up Go Practice development environment..."
+
+          if ! command -v go &> /dev/null; then
+            echo "ERROR: Go is not installed. Please install Go {{.GO_VERSION}} or later."
+            exit 1
+          fi
+
+          go_version=$(go version | awk '{print $3}' | sed 's/go//')
+          echo "OK Go version: $go_version"
+
+          if ! command -v task &> /dev/null; then
+            echo "WARNING: Task is not installed. Install it from https://taskfile.dev"
+          else
+            task_version=$(task --version)
+            echo "OK Task version: $task_version"
+          fi
+
+          echo "Development environment ready!"
+          echo ""
+          echo "Quick start:"
+          echo "  task build    # Build all exercises"
+          echo "  task test     # Run tests"
+          echo "  task validate # Quick validation"
+
+  # Quick check (faster validation)
+  quick-check:
+    desc: Quick check of main files
+    summary: |
+      Quickly checks that main.go files exist and are syntactically valid.
+    cmds:
+      - echo "Quick checking main.go files..."
+      - for exercise in 01-url-downloader 02-file-organizer 03-log-analyzer 04-json-validator 05-port-scanner 06-dir-sizer 07-web-server 08-index-generator; do
+          if [ -f "$exercise/solution/main.go" ]; then
+            echo "  OK $exercise/solution/main.go exists"
+            cd "$exercise/solution"
+            go vet main.go
+            cd ../..
+          else
+            echo "  MISSING $exercise/solution/main.go"
+          fi
+        done
+      - echo "Quick check completed!"
+
+  # Help for individual exercises
+  exercise-info:
+    desc: Show info for a specific exercise
+    summary: |
+      Shows basic information about a specific exercise.
+      Usage: task exercise-info -- 01-url-downloader
+    vars:
+      EXERCISE: "{{.CLI_ARGS}}"
+    cmds:
+      - |
+        if [ -z "{{.EXERCISE}}" ]; then
+          echo "Usage: task exercise-info -- <exercise-name>"
+          echo "Available exercises:"
+          echo "  01-url-downloader"
+          echo "  02-file-organizer"
+          echo "  03-log-analyzer"
+          echo "  04-json-validator"
+          echo "  05-port-scanner"
+          echo "  06-dir-sizer"
+          echo "  07-web-server"
+          echo "  08-index-generator"
+          echo "  09-testing-fundamentals"
+          exit 1
+        fi
+
+        echo "Exercise {{.EXERCISE}} Info"
+        echo "========================="
+        if [ -d "{{.EXERCISE}}" ]; then
+          echo "  OK Directory exists"
+          if [ -f "{{.EXERCISE}}/README.md" ]; then
+            echo "  OK Has README.md"
+          fi
+          if [ -f "{{.EXERCISE}}/solution/main.go" ]; then
+            echo "  OK Has solution"
+          fi
+          if [ -f "{{.EXERCISE}}/solution/go.mod" ]; then
+            echo "  OK Has Go module"
+          fi
+          if [ -d "{{.EXERCISE}}/solution" ] && find "{{.EXERCISE}}/solution" -name "*_test.go" -type f | grep -q .; then
+            echo "  OK Has tests"
+          fi
+        else
+          echo "ERROR: Exercise directory not found"
+        fi

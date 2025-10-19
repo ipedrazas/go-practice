@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"sort"
@@ -15,12 +16,12 @@ import (
 )
 
 type ScanResult struct {
-	Port    int       `json:"port"`
-	Status  string    `json:"status"` // open, closed, filtered
-	Service string    `json:"service,omitempty"`
-	Banner  string    `json:"banner,omitempty"`
-	Latency int64     `json:"latency_ms"`
-	Error   string    `json:"error,omitempty"`
+	Port    int    `json:"port"`
+	Status  string `json:"status"` // open, closed, filtered
+	Service string `json:"service,omitempty"`
+	Banner  string `json:"banner,omitempty"`
+	Latency int64  `json:"latency_ms"`
+	Error   string `json:"error,omitempty"`
 }
 
 type ScanSummary struct {

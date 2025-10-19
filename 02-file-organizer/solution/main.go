@@ -14,9 +14,9 @@ import (
 type OrganizeMethod string
 
 const (
-	ByType  OrganizeMethod = "type"
-	BySize  OrganizeMethod = "size"
-	ByDate  OrganizeMethod = "date"
+	ByType OrganizeMethod = "type"
+	BySize OrganizeMethod = "size"
+	ByDate OrganizeMethod = "date"
 )
 
 type FileInfo struct {
@@ -165,7 +165,10 @@ func (o *Organizer) scanDirectory() ([]FileInfo, error) {
 	}
 
 	if o.Recursive {
-		err = filepath.Walk(o.Directory, walkFunc)
+		err := filepath.Walk(o.Directory, walkFunc)
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		entries, err := os.ReadDir(o.Directory)
 		if err != nil {
@@ -189,7 +192,7 @@ func (o *Organizer) scanDirectory() ([]FileInfo, error) {
 		}
 	}
 
-	return files, err
+	return files, nil
 }
 
 func (o *Organizer) getFileCategory(path string, info os.FileInfo) string {

@@ -41,6 +41,28 @@ Each exercise follows this structure:
 - Basic understanding of programming concepts
 - Text editor or IDE
 - Terminal/command line
+- (Optional) [Task](https://taskfile.dev/) for automated builds and validation
+
+### 🚀 Quick Start with Task
+
+If you have Task installed, you can quickly validate all exercises:
+
+```bash
+# Install Task (if needed)
+brew install go-task  # macOS
+curl -sL https://taskfile.dev/install.sh | sh  # Linux
+
+# Validate all exercises build correctly
+task validate
+
+# Run tests (currently testing exercise only)
+task test
+
+# Get help with all commands
+task --list
+```
+
+See [TASKFILE.md](./TASKFILE.md) for detailed Task usage.
 
 ## 📝 Tips for Success
 

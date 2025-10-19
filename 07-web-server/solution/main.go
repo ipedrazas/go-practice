@@ -9,15 +9,16 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
 type PageData struct {
-	Title       string      `json:"title"`
-	Content     string      `json:"content"`
-	Posts       []BlogPost  `json:"posts,omitempty"`
-	CurrentTime time.Time   `json:"current_time"`
-	RequestID   string      `json:"request_id"`
+	Title       string     `json:"title"`
+	Content     string     `json:"content"`
+	Posts       []BlogPost `json:"posts,omitempty"`
+	CurrentTime time.Time  `json:"current_time"`
+	RequestID   string     `json:"request_id"`
 }
 
 type BlogPost struct {
@@ -346,12 +347,4 @@ func loadSamplePosts() []BlogPost {
 			Date:    time.Now().AddDate(0, 0, -2),
 		},
 	}
-}
-
-// Helper function for missing import in Go versions < 1.20
-func strings.TrimPrefix(s, prefix string) string {
-	if len(s) >= len(prefix) && s[:len(prefix)] == prefix {
-		return s[len(prefix):]
-	}
-	return s
 }
