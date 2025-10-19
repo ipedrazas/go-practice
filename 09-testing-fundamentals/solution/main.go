@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"./password"
+	"password-validator"
 )
 
 func main() {
