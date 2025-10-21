@@ -18,11 +18,12 @@ go-practice/
 ├── 06-dir-sizer/               # Recursive traversal, disk usage analysis
 ├── 07-web-server/              # HTTP server, templates, routing
 ├── 08-index-generator/         # Markdown generation, file parsing
-└── 09-testing-fundamentals/    # Go testing, TDD, benchmarks, table-driven tests
-    └── solution/
-        ├── main.go             # CLI interface
-        ├── go.mod              # Module definition
-        └── password/           # Package with validators and tests
+├── 09-testing-fundamentals/    # Go testing, TDD, benchmarks, table-driven tests
+│   └── solution/
+│       ├── main.go             # CLI interface
+│       ├── go.mod              # Module definition
+│       └── password/           # Package with validators and tests
+└── 10-file-watcher/            # File system monitoring, event-driven programming
 ```
 
 ### Exercise Structure Pattern
@@ -83,7 +84,7 @@ task --list
 
 ### Manual Build Commands
 
-**For exercises 01-08 (single-file programs):**
+**For exercises 01-08 and 10 (single-file programs):**
 ```bash
 cd <exercise-name>/solution
 go build -o <exercise-name> main.go
@@ -190,6 +191,13 @@ go tool cover -html=coverage.out
 - Mock implementations implementing interfaces
 - Test helpers and utility functions
 
+**10-file-watcher:**
+- Polling-based file system monitoring
+- State tracking with maps
+- Event detection and handling
+- Signal handling for graceful shutdown
+- Concurrent monitoring with goroutines
+
 ## Common Development Workflows
 
 ### Adding a New Exercise
@@ -230,6 +238,7 @@ task test     # Run tests
 7. **HTTP server, templating, routing**
 8. **File parsing, Markdown generation, metadata extraction**
 9. **Testing framework, TDD, mocks, benchmarks, table-driven tests**
+10. **File system monitoring, time-based operations, event-driven programming, signal handling**
 
 ## Important Notes
 
@@ -237,7 +246,7 @@ task test     # Run tests
 - **Progressive Complexity**: Exercises are numbered by difficulty and build on previous concepts
 - **Practical Tools**: Each exercise creates a genuinely useful CLI tool, not toy examples
 - **TDD Exercise**: Exercise 09 intentionally has failing tests for learning purposes - this is expected
-- **No Module Files**: Exercises 01-08 don't use `go.mod` files; they're simple standalone programs
+- **No Module Files**: Exercises 01-08 and 10 don't use `go.mod` files; they're simple standalone programs
 
 ## Troubleshooting
 

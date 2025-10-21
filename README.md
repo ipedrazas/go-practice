@@ -19,6 +19,7 @@ Instead of abstract examples and toy functions, these exercises build complete, 
 | [7. Simple Web Server with Templates](./07-web-server/) | HTTP server programming, HTML templates, Static file serving, HTTP routing and handlers, Request handling and form processing | Create a web server that serves dynamic content using HTML templates and static files. |
 | [8. Exercise Index Generator Tool](./08-index-generator/) | Directory traversal and analysis, Markdown generation, File parsing and content extraction, Template-based content generation, Metadata extraction from structured content | Create a tool that automatically generates the main README.md index by scanning all exercise directories and extracting their metadata. |
 | [9. Testing Fundamentals and TDD](./09-testing-fundamentals/) | Go testing framework, Test-Driven Development (TDD) methodology, Unit testing and test organization, Mocking and test doubles, Benchmark testing, Table-driven tests, Test coverage and reporting | Learn Go's testing framework by building a simple library with comprehensive tests using Test-Driven Development (TDD). |
+| [10. File Watcher](./10-file-watcher/) | File system monitoring, Time-based operations, Event-driven programming, Concurrent operations, Signal handling, Pattern matching | Create a file system watcher that monitors directories for changes and triggers actions when files are created, modified, or deleted. |
 ## 🚀 Getting Started
 
 Each exercise follows this structure:
@@ -80,4 +81,4 @@ Found a bug? Want to add an exercise? Contributions are welcome!
 Ready to start? Jump into [Exercise 1: URL Downloader](./01-url-downloader/) and begin your Go practice journey!
 
 ---
-*Index generated on 2025-10-19 • 9 exercises*
+*Index generated on 2025-10-20 • 10 exercises*

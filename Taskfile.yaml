@@ -20,7 +20,7 @@ tasks:
       This will fail if any exercise has compilation errors.
     cmds:
       - cmd: |
-          for exercise in 01-url-downloader 02-file-organizer 03-log-analyzer 04-json-validator 05-port-scanner 06-dir-sizer 07-web-server 08-index-generator; do
+          for exercise in 01-url-downloader 02-file-organizer 03-log-analyzer 04-json-validator 05-port-scanner 06-dir-sizer 07-web-server 08-index-generator 10-file-watcher; do
             echo "Building $exercise..."
             cd "$exercise/solution"
             if [ -f main.go ]; then
@@ -93,7 +93,8 @@ tasks:
     summary: |
       Removes compiled binaries and other build artifacts.
     cmds:
-      - for exercise in 01-url-downloader 02-file-organizer 03-log-analyzer 04-json-validator 05-port-scanner 06-dir-sizer 07-web-server 08-index-generator 09-testing-fundamentals; do
+      - |
+        for exercise in 01-url-downloader 02-file-organizer 03-log-analyzer 04-json-validator 05-port-scanner 06-dir-sizer 07-web-server 08-index-generator 09-testing-fundamentals 10-file-watcher; do
           cd "$exercise/solution"
           rm -f "$exercise"
           rm -f exercise
@@ -110,7 +111,8 @@ tasks:
     summary: |
       Checks if all Go files are properly formatted.
     cmds:
-      - for exercise in 01-url-downloader 02-file-organizer 03-log-analyzer 04-json-validator 05-port-scanner 06-dir-sizer 07-web-server 08-index-generator 09-testing-fundamentals; do
+      - |
+        for exercise in 01-url-downloader 02-file-organizer 03-log-analyzer 04-json-validator 05-port-scanner 06-dir-sizer 07-web-server 08-index-generator 09-testing-fundamentals 10-file-watcher; do
           cd "$exercise/solution"
           if [ -f go.mod ]; then
             go fmt ./...
@@ -127,7 +129,8 @@ tasks:
     summary: |
       Runs go vet to analyze code for potential issues.
     cmds:
-      - for exercise in 01-url-downloader 02-file-organizer 03-log-analyzer 04-json-validator 05-port-scanner 06-dir-sizer 07-web-server 08-index-generator 09-testing-fundamentals; do
+      - |
+        for exercise in 01-url-downloader 02-file-organizer 03-log-analyzer 04-json-validator 05-port-scanner 06-dir-sizer 07-web-server 08-index-generator 09-testing-fundamentals 10-file-watcher; do
           cd "$exercise/solution"
           if [ -f go.mod ]; then
             go vet ./...
@@ -138,33 +141,6 @@ tasks:
         done
       - echo "Code analysis completed"
 
-  # Generate summary report
-  summary:
-    desc: Generate summary of all exercises
-    summary: |
-      Creates a summary report of the Go Practice syllabus.
-    cmds:
-      - cmd: |
-          echo "Go Practice: Real-World CLI Exercises"
-          echo "=========================================="
-          echo ""
-          echo "Available exercises:"
-          echo "  01-url-downloader      - Download files from URLs"
-          echo "  02-file-organizer     - Organize files by type and rules"
-          echo "  03-log-analyzer       - Parse and analyze log files"
-          echo "  04-json-validator     - Validate JSON configurations"
-          echo "  05-port-scanner       - Scan network ports"
-          echo "  06-dir-sizer          - Analyze directory disk usage"
-          echo "  07-web-server         - Build a web server with templates"
-          echo "  08-index-generator    - Generate exercise index"
-          echo "  09-testing-fundamentals - Learn Go testing and TDD"
-          echo ""
-          echo "Total: 9 exercises"
-          echo ""
-          echo "Get started with:"
-          echo "  task build    # Build all exercises"
-          echo "  task test     # Run tests"
-          echo "  task validate # Quick validation"
 
   # Build specific exercise
   build-exercise:
@@ -188,6 +164,7 @@ tasks:
           echo "  07-web-server"
           echo "  08-index-generator"
           echo "  09-testing-fundamentals"
+          echo "  10-file-watcher"
           exit 1
         fi
 
@@ -268,7 +245,8 @@ tasks:
       Quickly checks that main.go files exist and are syntactically valid.
     cmds:
       - echo "Quick checking main.go files..."
-      - for exercise in 01-url-downloader 02-file-organizer 03-log-analyzer 04-json-validator 05-port-scanner 06-dir-sizer 07-web-server 08-index-generator; do
+      - |
+        for exercise in 01-url-downloader 02-file-organizer 03-log-analyzer 04-json-validator 05-port-scanner 06-dir-sizer 07-web-server 08-index-generator 10-file-watcher; do
           if [ -f "$exercise/solution/main.go" ]; then
             echo "  OK $exercise/solution/main.go exists"
             cd "$exercise/solution"
@@ -279,48 +257,3 @@ tasks:
           fi
         done
       - echo "Quick check completed!"
-
-  # Help for individual exercises
-  exercise-info:
-    desc: Show info for a specific exercise
-    summary: |
-      Shows basic information about a specific exercise.
-      Usage: task exercise-info -- 01-url-downloader
-    vars:
-      EXERCISE: "{{.CLI_ARGS}}"
-    cmds:
-      - |
-        if [ -z "{{.EXERCISE}}" ]; then
-          echo "Usage: task exercise-info -- <exercise-name>"
-          echo "Available exercises:"
-          echo "  01-url-downloader"
-          echo "  02-file-organizer"
-          echo "  03-log-analyzer"
-          echo "  04-json-validator"
-          echo "  05-port-scanner"
-          echo "  06-dir-sizer"
-          echo "  07-web-server"
-          echo "  08-index-generator"
-          echo "  09-testing-fundamentals"
-          exit 1
-        fi
-
-        echo "Exercise {{.EXERCISE}} Info"
-        echo "========================="
-        if [ -d "{{.EXERCISE}}" ]; then
-          echo "  OK Directory exists"
-          if [ -f "{{.EXERCISE}}/README.md" ]; then
-            echo "  OK Has README.md"
-          fi
-          if [ -f "{{.EXERCISE}}/solution/main.go" ]; then
-            echo "  OK Has solution"
-          fi
-          if [ -f "{{.EXERCISE}}/solution/go.mod" ]; then
-            echo "  OK Has Go module"
-          fi
-          if [ -d "{{.EXERCISE}}/solution" ] && find "{{.EXERCISE}}/solution" -name "*_test.go" -type f | grep -q .; then
-            echo "  OK Has tests"
-          fi
-        else
-          echo "ERROR: Exercise directory not found"
-        fi
