@@ -63,7 +63,6 @@ task test
 task --list
 ```
 
-See [TASKFILE.md](./TASKFILE.md) for detailed Task usage.
 
 ## 📝 Tips for Success
 
